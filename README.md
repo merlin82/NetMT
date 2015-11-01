@@ -17,4 +17,6 @@ virtual int check_complete(char* data, std::size_t data_len) = 0;
 Please see example in test folder.
 
 ###Compile
-need blade and boost support
+need boost support
+default compile by blade
+blade build test
