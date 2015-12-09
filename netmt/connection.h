@@ -6,7 +6,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-namespace netmt {
+namespace netmt
+{
 
 const int DEFAULT_BUFFER_LEN = 8192;
 
@@ -22,6 +23,11 @@ public:
 
     /// Set receive buffer size, only can set in handle_connect.
     void set_buffer_len(std::size_t buffer_len);
+
+    int SendAndRecv(const char* data, uint32_t data_len, char*& rsp_data,
+            uint32_t& rsp_data_len, int timeout_ms = 10000);
+
+    int AsyncSend(const char* data, uint32_t data_len);
 private:
     /// Construct a Connection with the given io_service.
     explicit Connection(Server& server);

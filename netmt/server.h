@@ -5,7 +5,8 @@
 #include <boost/thread.hpp>
 #include "connection.h"
 
-namespace netmt {
+namespace netmt
+{
 class Server: private boost::noncopyable
 {
 public:
@@ -14,25 +15,34 @@ public:
             std::size_t thread_pool_size);
 
     virtual ~Server();
-    
+
     /// Run the server's io_service loop.
     void run();
 
-    /// handle message request
-    virtual void handle_request(Connection_ptr conn, char* data, std::size_t data_len) = 0;
+    /// handle message
+    virtual void handle_message(Connection_ptr conn, const char* data,
+            std::size_t data_len) = 0;
 
     /// check message whether complete
     /// return 0:not complete, <0:error, >0:message length
-    virtual int check_complete(char* data, std::size_t data_len) = 0;    
+    virtual int check_complete(Connection_ptr conn, const char* data,
+            std::size_t data_len) = 0;
 
     /// handle connect event
     virtual void handle_connect(Connection_ptr conn);
 
     /// handle disconnect event
     virtual void handle_disconnect(Connection_ptr conn);
-    
+
+    /// handle completion of a write operation.
+    void handle_write(Connection_ptr conn, const char* data,
+            std::size_t data_len, const boost::system::error_code& e);
+
     /// get io_service
-    boost::asio::io_service& io_service() {return m_io_service;}
+    boost::asio::io_service& io_service()
+    {
+        return m_io_service;
+    }
 private:
     /// Initiate an asynchronous accept operation.
     void start_accept();

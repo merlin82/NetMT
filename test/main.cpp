@@ -30,16 +30,14 @@ public:
     }
     
     /// handle message request
-    void handle_request(Connection_ptr conn, char* data, std::size_t data_len)
+    void handle_message(Connection_ptr conn, const char* data, std::size_t data_len)
     {
-        conn->async_send(boost::asio::buffer(data, data_len),
-            boost::bind(&EchoServer::handle_write, this, conn,
-                boost::asio::placeholders::error));
+        conn->AsyncSend(data, data_len);
     }
 
     /// check message whether complete
     /// return 0:not complete, <0:error, >0:message length
-    int check_complete(char* data, std::size_t data_len)
+    int check_complete(Connection_ptr conn, const char* data, std::size_t data_len)
     {
         for (std::size_t i = 0; i < data_len; ++i)
         {
@@ -49,16 +47,6 @@ public:
             }
         }
         return 0;
-    }
-
-    /// handle completion of a write operation.
-    void handle_write(Connection_ptr conn, const boost::system::error_code& e)
-    {
-        if (e)
-        {
-            boost::system::error_code ignored_ec;
-            conn->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
-        }        
     }
 };
 

@@ -2,7 +2,8 @@
 #include "server.h"
 #include "connection.h"
 
-namespace netmt {
+namespace netmt
+{
 
 Connection::Connection(Server& server) :
         boost::asio::ip::tcp::socket(server.io_service()), m_server(server)
@@ -50,10 +51,11 @@ void Connection::handle_read(const boost::system::error_code& e,
     if (!e)
     {
         m_data_len += bytes_transferred;
-        int ret = m_server.check_complete(m_data, m_data_len);
+        int ret = m_server.check_complete(shared_from_this(), m_data,
+                m_data_len);
         if (ret > 0)
         {
-            m_server.handle_request(shared_from_this(), m_data, ret);
+            m_server.handle_message(shared_from_this(), m_data, ret);
             m_data += ret;
             m_data_len -= ret;
         }
@@ -82,8 +84,22 @@ void Connection::handle_read(const boost::system::error_code& e,
     }
     else
     {
-        m_server.handle_disconnect(shared_from_this());        
+        m_server.handle_disconnect(shared_from_this());
     }
+}
+
+int Connection::SendAndRecv(const char* data, uint32_t data_len,
+        char*& rsp_data, uint32_t& rsp_data_len, int timeout_ms)
+{
+    return 0;
+}
+
+int Connection::AsyncSend(const char* data, uint32_t data_len)
+{
+    async_send(boost::asio::buffer(data, data_len),
+            boost::bind(&Server::handle_write, &m_server, shared_from_this(),
+                    data, data_len, boost::asio::placeholders::error));
+    return 0;
 }
 
 }

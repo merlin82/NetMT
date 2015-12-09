@@ -2,7 +2,8 @@
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 
-namespace netmt {
+namespace netmt
+{
 
 Server::Server(const std::string& address, const std::string& port,
         std::size_t thread_pool_size) :
@@ -73,12 +74,22 @@ void Server::handle_stop()
 
 void Server::handle_connect(Connection_ptr conn)
 {
-    
+
 }
 
 void Server::handle_disconnect(Connection_ptr conn)
 {
 
+}
+
+void Server::handle_write(Connection_ptr conn, const char* data, std::size_t data_len,
+        const boost::system::error_code& e)
+{
+    if (e)
+    {
+        boost::system::error_code ignored_ec;
+        conn->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+    }
 }
 
 }
