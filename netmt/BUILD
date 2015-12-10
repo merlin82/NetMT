@@ -1,8 +1,7 @@
 cc_library(
     name = 'netmt',
     srcs = [
-        'connection.cpp',
-        'server.cpp',
+        '*.cpp',
     ],
     deps = [
         '#boost_system',

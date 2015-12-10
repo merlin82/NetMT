@@ -1,5 +1,5 @@
-#ifndef _NETMT_SERVER_H_
-#define _NETMT_SERVER_H_
+#ifndef _NETMT_ASYNC_CLIENT_H_
+#define _NETMT_ASYNC_CLIENT_H_
 
 #include <string>
 #include <boost/thread.hpp>

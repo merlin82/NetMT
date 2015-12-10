@@ -16,28 +16,28 @@ public:
             {}
 
     /// handle connect event
-    void handle_connect(Connection_ptr conn)
+    void HandleConnect(ConnectionPtr conn)
     {
         // test max receive buffer length
-        conn->set_buffer_len(1024);
+        conn->SetBufferLen(1024);
         cout << conn->remote_endpoint() << " connect" << endl;
     }
  
     /// handle disconnect event
-    void handle_disconnect(Connection_ptr conn)
+    void HandleDisconnect(ConnectionPtr conn)
     {
         cout << conn->remote_endpoint() << " disconnect"  << endl;
     }
     
     /// handle message request
-    void handle_message(Connection_ptr conn, const char* data, std::size_t data_len)
+    void HandleMessage(ConnectionPtr conn, const char* data, std::size_t data_len)
     {
         conn->AsyncSend(data, data_len);
     }
 
     /// check message whether complete
     /// return 0:not complete, <0:error, >0:message length
-    int check_complete(Connection_ptr conn, const char* data, std::size_t data_len)
+    int CheckComplete(ConnectionPtr conn, const char* data, std::size_t data_len)
     {
         for (std::size_t i = 0; i < data_len; ++i)
         {
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
         EchoServer s(argv[1], argv[2], num_threads);
 
         // Run the server until stopped.
-        s.run();
+        s.Run();
     } catch (std::exception& e)
     {
         cerr << "exception: " << e.what() << "\n";

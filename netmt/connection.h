@@ -22,10 +22,7 @@ public:
     ~Connection();
 
     /// Set receive buffer size, only can set in handle_connect.
-    void set_buffer_len(std::size_t buffer_len);
-
-    int SendAndRecv(const char* data, uint32_t data_len, char*& rsp_data,
-            uint32_t& rsp_data_len, int timeout_ms = 10000);
+    void SetBufferLen(std::size_t buffer_len);
 
     int AsyncSend(const char* data, uint32_t data_len);
 private:
@@ -33,11 +30,14 @@ private:
     explicit Connection(Server& server);
 
     /// Start the first asynchronous operation for the Connection.
-    void start();
+    void Start();
 
     /// Handle completion of a read operation.
-    void handle_read(const boost::system::error_code& e,
+    void HandleRead(const boost::system::error_code& e,
             std::size_t bytes_transferred);
+
+    void HandleConnect(const char* data,
+            std::size_t data_len, const boost::system::error_code& e); 
 private:
     Server& m_server;
 
@@ -50,7 +50,7 @@ private:
     std::size_t m_data_len;
 };
 
-typedef boost::shared_ptr<Connection> Connection_ptr;
+typedef boost::shared_ptr<Connection> ConnectionPtr;
 }
 
 #endif
