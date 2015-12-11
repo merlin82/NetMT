@@ -1,77 +1,50 @@
 #ifndef _NETMT_ASYNC_CLIENT_H_
 #define _NETMT_ASYNC_CLIENT_H_
 
-#include <string>
-#include <boost/thread.hpp>
 #include "connection.h"
+#include <boost/thread/mutex.hpp>
+#include <vector>
 
 namespace netmt
 {
-class Server: private boost::noncopyable
+
+class AsyncConnection: public Connection
 {
 public:
-    /// Construct the server to listen on the specified TCP address and port
-    explicit Server(const std::string& address, const std::string& port,
-            std::size_t thread_pool_size);
+    explicit AsyncConnection(Server* server, const std::string& ip, uint16_t port);
+    
+    virtual ~AsyncConnection();
 
-    virtual ~Server();
+    void Send(const char* data, uint32_t data_len);
 
-    /// Run the server's io_service loop.
-    void Run();
-
-    ///
-    ConnectionPtr GetConnection(const std::string& address, const std::string& port);
-
-    /// handle message
-    virtual void HandleMessage(ConnectionPtr conn, const char* data,
-            std::size_t data_len) = 0;
-
-    /// check message whether complete
-    /// return 0:not complete, <0:error, >0:message length
-    virtual int CheckComplete(ConnectionPtr conn, const char* data,
-            std::size_t data_len) = 0;
-
-    /// handle connect event
-    virtual void HandleConnect(ConnectionPtr conn);
-
-    /// handle disconnect event
-    virtual void HandleDisconnect(ConnectionPtr conn);
-
-    /// handle completion of a write operation.
-    void HandleWrite(ConnectionPtr conn, const char* data,
-            std::size_t data_len, const boost::system::error_code& e);
-
-    /// get io_service
-    boost::asio::io_service& io_service()
-    {
-        return m_io_service;
-    }
 private:
-    /// Initiate an asynchronous accept operation.
-    void StartAccept();
+    void HandleConnect(DataPtr data_ptr, const boost::system::error_code& e); 
 
-    /// Handle completion of an asynchronous accept operation.
-    void HandleAccept(const boost::system::error_code& e);
+    void HandleSend(DataPtr data_ptr, const boost::system::error_code& e, bool resend);
 
-    /// Handle a request to stop the server.
-    void HandleStop();
+private:
+    std::string m_ip;
+    uint16_t m_port;    
+};
+typedef boost::shared_ptr<AsyncConnection> AsyncConnectionPtr;
 
-    boost::thread_group m_thread_grp;
+class ASyncClient: private boost::noncopyable
+{
+public:
+    ASyncClient();
+    ~ASyncClient();
 
-    /// The number of threads that will call io_service::run().
-    std::size_t m_thread_pool_size;
+    static ASyncClient* Instance();
 
-    /// The io_service used to perform asynchronous operations.
-    boost::asio::io_service m_io_service;
-
-    /// The signal_set is used to register for process termination notifications.
-    boost::asio::signal_set m_signals;
-
-    /// Acceptor used to listen for incoming connections.
-    boost::asio::ip::tcp::acceptor m_acceptor;
-
-    /// The next connection to be accepted.
-    ConnectionPtr m_new_connection;
+    int Send(Server* server, const std::string& ip, uint16_t port, const char* data,
+                uint32_t data_len);
+private:
+    AsyncConnectionPtr GetConnection(Server* server, const std::string& ip, uint16_t port);
+    
+private:
+    static ASyncClient s_client;
+    std::map<boost::asio::ip::tcp::endpoint, AsyncConnectionPtr> m_conn_map;
+    boost::mutex m_mutex;
 };
 }
 #endif

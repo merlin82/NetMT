@@ -19,9 +19,6 @@ public:
     /// Run the server's io_service loop.
     void Run();
 
-    ///
-    ConnectionPtr GetConnection(const std::string& address, const std::string& port);
-
     /// handle message
     virtual void HandleMessage(ConnectionPtr conn, const char* data,
             std::size_t data_len) = 0;
@@ -37,8 +34,8 @@ public:
     /// handle disconnect event
     virtual void HandleDisconnect(ConnectionPtr conn);
 
-    /// handle completion of a write operation.
-    void HandleWrite(ConnectionPtr conn, const char* data,
+    /// handle async_send error
+    void HandleSendError(ConnectionPtr conn, const char* data,
             std::size_t data_len, const boost::system::error_code& e);
 
     /// get io_service

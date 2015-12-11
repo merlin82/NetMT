@@ -50,16 +50,9 @@ void Server::Run()
     m_thread_grp.join_all();
 }
 
-ConnectionPtr Server::GetConnection(const std::string& address, const std::string& port)
-{
-    ConnectionPtr conn;
-    conn.reset(new Connection(*this));
-    return conn;
-}
-
 void Server::StartAccept()
 {
-    m_new_connection.reset(new Connection(*this));
+    m_new_connection.reset(new Connection(this));
     m_acceptor.async_accept(*m_new_connection,
             boost::bind(&Server::HandleAccept, this,
                     boost::asio::placeholders::error));
@@ -91,14 +84,10 @@ void Server::HandleDisconnect(ConnectionPtr conn)
 
 }
 
-void Server::HandleWrite(ConnectionPtr conn, const char* data, std::size_t data_len,
+void Server::HandleSendError(ConnectionPtr conn, const char* data, std::size_t data_len,
         const boost::system::error_code& e)
 {
-    if (e)
-    {
-        boost::system::error_code ignored_ec;
-        conn->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
-    }
+
 }
 
 }
